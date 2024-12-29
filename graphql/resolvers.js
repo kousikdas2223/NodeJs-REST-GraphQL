@@ -182,45 +182,42 @@ module.exports = {
             error.code = 401;
             throw error;
         }
-
         const post = await Post.findById(id).populate('creator');
-
         if (!post) {
-            const error = new Error('Not post found!');
+            const error = new Error('No post found!');
             error.code = 404;
             throw error;
         }
-
         if (post.creator._id.toString() !== req.userId.toString()) {
             const error = new Error('Not authorized to edit the post!');
             error.code = 403;
             throw error;
         }
-
         const errors = [];
-
-        if (!validator.isEmail(postInput.email)) {
-            errors.push({ message: 'Email is invalid' });
-        }
-        if (!validator.isLength(postInput.password, { min: 5 }) || validator.isEmpty(postInput.password)) {
-            errors.push({ message: 'Password must be at least 6 characters' });
-        }
+        if (
+            validator.isEmpty(postInput.title) ||
+            !validator.isLength(postInput.title, { min: 5 })
+          ) {
+            errors.push({ message: 'Title is invalid.' });
+          }
+          if (
+            validator.isEmpty(postInput.content) ||
+            !validator.isLength(postInput.content, { min: 5 })
+          ) {
+            errors.push({ message: 'Content is invalid.' });
+          }
         if (errors.length > 0) {
             const error = new Error('Invalid input values');
             error.data = errors;
             error.code = 422;
             throw error;
         }
-
         post.title = postInput.title;
         post.content = postInput.content;
-
-        if (post.imageUrl !== 'undefined') {
+        if (postInput.imageUrl !== 'undefined') {
             post.imageUrl = postInput.imageUrl;
         }
-
         const updatedPost = await post.save();
-
         return {
             ...updatedPost._doc,
             _id: updatedPost._id.toString(),
@@ -239,7 +236,7 @@ module.exports = {
         const post = await Post.findById(id);
 
         if (!post) {
-            const error = new Error('Not post found!');
+            const error = new Error('No post found!');
             error.code = 404;
             throw error;
         }
@@ -265,7 +262,7 @@ module.exports = {
         }
         const user = await User.findById(req.userId);
         if (!user) {
-            const error = new Error('Not user found!');
+            const error = new Error('No user found!');
             error.code = 404;
             throw error;
         }
@@ -279,7 +276,7 @@ module.exports = {
         }
         const user = await User.findById(req.userId);
         if (!user) {
-            const error = new Error('Not user found!');
+            const error = new Error('No user found!');
             error.code = 404;
             throw error;
         }
